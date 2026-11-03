@@ -1,0 +1,26 @@
+# Runs on every push and pull request: builds the uv environment and runs the
+# end-to-end tests on synthetic data (no download, ~1 minute).
+name: tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Lock (creates uv.lock if it does not exist yet)
+        run: uv lock
+      - name: Install (data + dev groups; the model group is checked by `uv lock`)
+        run: uv sync --no-group model
+      - name: Test
+        run: uv run pytest -q
+      - name: Upload uv.lock
+        uses: actions/upload-artifact@v4
+        with:
+          name: uv-lock
+          path: uv.lock

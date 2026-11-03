@@ -1,0 +1,2 @@
+# sha256 of raw files as downloaded. Check: shasum -a 256 -c SHA256SUMS
+# The first `uv run beds download` pins the hash here. Commit this file.

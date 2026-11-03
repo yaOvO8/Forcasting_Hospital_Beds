@@ -1,0 +1,31 @@
+# Manual run on the full HHS file: download -> check SHA256SUMS -> regenerate.
+# The raw data is NOT committed; only the small result tables are kept as an
+# artifact so the team can see the counts and baseline numbers.
+# Start it from the Actions tab ("Run workflow").
+name: real-data
+
+on:
+  workflow_dispatch:
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --no-group model
+      - name: Download raw CSV
+        run: uv run beds download
+      - name: Regenerate
+        run: uv run beds regenerate
+      - name: Show pinned hash
+        run: cat SHA256SUMS
+      - name: Upload results (no raw data)
+        uses: actions/upload-artifact@v4
+        with:
+          name: results
+          path: |
+            results/*.csv
+            results/figures/
+            SHA256SUMS
